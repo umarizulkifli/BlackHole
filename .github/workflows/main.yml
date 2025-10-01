@@ -18,7 +18,7 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
 
-      - name: Build BlackHole kext (arm64 + x86_64 universal)
+      - name: Build BlackHole kext (universal, unsigned)
         run: |
           xcodebuild \
             -project BlackHole.xcodeproj \
@@ -26,9 +26,12 @@ jobs:
             -configuration Release \
             ARCHS="x86_64 arm64" \
             ONLY_ACTIVE_ARCH=NO \
-            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM="" \
+            PROVISIONING_PROFILE_SPECIFIER=""
 
       - name: Make create_installer.sh executable
         run: chmod +x Installer/create_installer.sh
