@@ -21,7 +21,7 @@ jobs:
       - name: Build BlackHole kext (arm64 + x86_64 universal)
         run: |
           xcodebuild \
-            -project BlackHole/BlackHole.xcodeproj \
+            -project BlackHole.xcodeproj \
             -scheme BlackHole \
             -configuration Release \
             ARCHS="x86_64 arm64" \
