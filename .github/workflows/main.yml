@@ -25,7 +25,7 @@ jobs:
 
       - name: Build Installer
         run: |
-          arch -arm64 Installer/create_installer.sh
+          Installer/create_installer.sh
 
       - name: Archive Installer Output
         if: success()
