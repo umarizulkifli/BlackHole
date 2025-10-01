@@ -1,15 +1,13 @@
 name: Build macOS Installer
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
+  workflow_dispatch:   # only runs when triggered manually
 
 jobs:
   build-installer:
-    runs-on: macos-13
-    name: Build Installer for Apple M2 macOS 15.6.1
+    runs-on: macos-latest
+    name: Build Unsigned Installer for macOS
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -20,10 +18,22 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
 
+      - name: Build BlackHole kext (arm64 + x86_64 universal)
+        run: |
+          xcodebuild \
+            -project BlackHole/BlackHole.xcodeproj \
+            -scheme BlackHole \
+            -configuration Release \
+            ARCHS="x86_64 arm64" \
+            ONLY_ACTIVE_ARCH=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
       - name: Make create_installer.sh executable
         run: chmod +x Installer/create_installer.sh
 
-      - name: Build Installer
+      - name: Build Installer Package
         run: |
           Installer/create_installer.sh
 
@@ -33,3 +43,17 @@ jobs:
         with:
           name: macos-installer
           path: Installer/output/
+
+      - name: Create GitHub Release
+        if: github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: BlackHole Installer v${{ github.run_number }}
+          body: |
+            Automated build of **unsigned** BlackHole macOS installer.
+            ⚠️ macOS Gatekeeper will warn since this is unsigned —
+            right-click → Open → Allow to install.
+          files: Installer/output/*.pkg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
